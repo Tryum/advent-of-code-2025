@@ -18,7 +18,7 @@ pub fn is_valid_id(id: &u64, part: &Part) -> bool {
         Part::Two => 0,
     };
 
-    if part == &Part::One && id_str.len().is_multiple_of(2) {
+    if part == &Part::One && !id_str.len().is_multiple_of(2) {
         return true;
     }
 
