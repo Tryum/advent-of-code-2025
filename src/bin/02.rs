@@ -18,13 +18,13 @@ pub fn is_valid_id(id: &u64, part: &Part) -> bool {
         Part::Two => 0,
     };
 
-    if part == &Part::One && id_str.len() % 2 != 0 {
+    if part == &Part::One && id_str.len().is_multiple_of(2) {
         return true;
     }
 
     for i in start_idx..(id_str.len() / 2) {
         let leftover = id_str.trim_start_matches(&id_str[0..=i]);
-        if leftover.len() == 0 {
+        if leftover.is_empty() {
             return false;
         }
     }
