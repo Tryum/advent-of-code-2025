@@ -1,9 +1,28 @@
 advent_of_code::solution!(2);
 
-pub fn is_valid_id(id: &u64) -> bool {
+#[derive(PartialEq)]
+pub enum Part {
+    One,
+    Two,
+}
+
+pub fn is_valid_id(id: &u64, part: &Part) -> bool {
     let id_str = id.to_string();
 
-    for i in 0..(id_str.len()/2) {
+    if id_str.len() == 1 {
+        return true;
+    }
+
+    let start_idx = match part {
+        Part::One => id_str.len() / 2 - 1,
+        Part::Two => 0,
+    };
+
+    if part == &Part::One && id_str.len() % 2 != 0 {
+        return true;
+    }
+
+    for i in start_idx..(id_str.len() / 2) {
         let leftover = id_str.trim_start_matches(&id_str[0..=i]);
         if leftover.len() == 0 {
             return false;
@@ -13,50 +32,31 @@ pub fn is_valid_id(id: &u64) -> bool {
     true
 }
 
-pub fn part_one(input: &str) -> Option<u64> {
-     let ranges : Vec<&str> = input.trim_ascii().split(",").collect();
+fn solver(input: &str, part: &Part) -> Option<u64> {
+    let ranges: Vec<&str> = input.trim_ascii().split(",").collect();
 
-     let mut result = 0;
+    let mut result = 0;
 
-     for r in ranges {
-        dbg!(&r);
+    for r in ranges {
         let mut it = r.split("-").map(|x| x.parse::<u64>().unwrap());
         let min = it.next().unwrap();
         let max = it.next().unwrap();
         for id in min..=max {
-            
-            if !is_valid_id(&id) {
-                println!("{}", id);    
+            if !is_valid_id(&id, part) {
                 result += id;
             }
         }
+    }
 
-     }
+    Some(result)
+}
 
-     Some(result)
+pub fn part_one(input: &str) -> Option<u64> {
+    solver(input, &Part::One)
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-         let ranges : Vec<&str> = input.trim_ascii().split(",").collect();
-
-     let mut result = 0;
-
-     for r in ranges {
-        dbg!(&r);
-        let mut it = r.split("-").map(|x| x.parse::<u64>().unwrap());
-        let min = it.next().unwrap();
-        let max = it.next().unwrap();
-        for id in min..=max {
-            
-            if !is_valid_id(&id) {
-                println!("{}", id);    
-                result += id;
-            }
-        }
-
-     }
-
-     Some(result)
+    solver(input, &Part::Two)
 }
 
 #[cfg(test)]
@@ -77,11 +77,12 @@ mod tests {
 
     #[test]
     fn test_is_valid_id() {
-        assert_eq!(is_valid_id(&1234), true);
-        assert_eq!(is_valid_id(&12341234), false);
-        assert_eq!(is_valid_id(&123123123), false);
-        assert_eq!(is_valid_id(&1212121212), false);
-        assert_eq!(is_valid_id(&1111111), false);
-        assert_eq!(is_valid_id(&38593862), true);
+        assert_eq!(is_valid_id(&1234, &Part::Two), true);
+        assert_eq!(is_valid_id(&12341234, &Part::Two), false);
+        assert_eq!(is_valid_id(&123123123, &Part::Two), false);
+        assert_eq!(is_valid_id(&1212121212, &Part::Two), false);
+        assert_eq!(is_valid_id(&1111111, &Part::Two), false);
+        assert_eq!(is_valid_id(&38593862, &Part::Two), true);
+        assert_eq!(is_valid_id(&1010, &Part::One), false);
     }
 }
