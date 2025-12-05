@@ -53,7 +53,48 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let mut state = Input {
+        fresh_ingredients: Vec::new(),
+        ingredients: Vec::new(),
+    };
+    let mut parser_state = ParserState::FreshIngredients;
+    for line in input.lines() {
+        match parser_state {
+            ParserState::FreshIngredients => {
+                if line.trim().is_empty() {
+                    parser_state = ParserState::Ingredients;
+                } else {
+                    let mut range = line.split('-').map(|x| x.parse::<u64>().unwrap());
+                    let min = range.next().unwrap();
+                    let max = range.next().unwrap();
+                    state.fresh_ingredients.push((min, max));
+                }
+            }
+            ParserState::Ingredients => {
+                if line.trim().is_empty() {
+                    break;
+                }
+                let ingredient = line.trim().parse::<u64>().unwrap();
+                state.ingredients.push(ingredient);
+            }
+        }
+    }
+
+    let mut result = 0;
+    let mut next_min = 0;
+
+    state.fresh_ingredients.sort_by_key(|x| x.0);
+
+    for (min, max) in &state.fresh_ingredients {
+        let min = std::cmp::max(*min, next_min);
+        if min > *max {
+            continue;
+        }
+        result += max - min + 1;
+        next_min = *max + 1;
+    }
+
+    Some(result)
 }
 
 #[cfg(test)]
@@ -69,6 +110,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(14));
     }
 }
