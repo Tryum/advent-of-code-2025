@@ -7,19 +7,20 @@ pub fn largest_joltage_of_bank(input: &str, digit_count:  u64) -> Option<u64> {
     for i in 0..digit_count {
         let mut current_digit = 0;
         let remaining_digits = digit_count - i;
+        let mut current_index = last_index;
         for j in last_index..input.len()-(remaining_digits as usize)+1 {
             let c = input.chars().nth(j)?;
             let digit = c.to_digit(10)? as u64;
             if digit > current_digit {
                 current_digit = digit;
-                last_index = j;
+                current_index = j;
                 if current_digit == 9 {
                     break;
                 }
             }
         }
         result = result * 10 + current_digit;
-        last_index = last_index + 1;
+        last_index = current_index + 1;
     }
     Some(result)
 }
