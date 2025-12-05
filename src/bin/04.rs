@@ -1,16 +1,10 @@
 advent_of_code::solution!(4);
 
-pub fn part_one(input: &str) -> Option<u64> {
+pub fn solve(grid: &[Vec<char>]) -> (u64, Vec<Vec<char>>) {
     let mut result = 0;
-    let mut grid = Vec::new();
-    for line in input.lines() {
-        if line.is_empty() {
-            continue;
-        }
-        grid.push(line.chars().collect::<Vec<char>>());
-    }
-
+    let mut new_grid = Vec::new();
     for (i, row) in grid.iter().enumerate() {
+        let mut new_row = Vec::new();
         for (j, &cell) in row.iter().enumerate() {
             if cell == '@' {
                 let mut count = 0;
@@ -33,21 +27,54 @@ pub fn part_one(input: &str) -> Option<u64> {
                 }
                 if count < 4 {
                     result += 1;
-                    print!("X");
+                    new_row.push('x');
                 } else {
-                    print!("@");
+                    new_row.push('@');
                 }
             } else {
-                print!(".");
+                new_row.push('.');
             }
         }
-        println!()
+        new_grid.push(new_row);
     }
+    (result, new_grid)
+}
+
+pub fn part_one(input: &str) -> Option<u64> {
+    let mut grid = Vec::new();
+    for line in input.lines() {
+        if line.is_empty() {
+            continue;
+        }
+        grid.push(line.chars().collect::<Vec<char>>());
+    }
+
+    let (result, _new_grid) = solve(&grid);
+
     Some(result)
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let mut result = 0;
+    let mut grid = Vec::new();
+    for line in input.lines() {
+        if line.is_empty() {
+            continue;
+        }
+        grid.push(line.chars().collect::<Vec<char>>());
+    }
+
+    loop {
+        //dbg!(grid.iter().map(|r| r.iter().collect::<String>()).collect::<Vec<String>>());
+        let (moved, new_grid) = solve(&grid);
+        if moved == 0 {
+            break;
+        }
+        result += moved;
+        grid = new_grid;
+    }
+
+    Some(result)
 }
 
 #[cfg(test)]
@@ -63,6 +90,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(43));
     }
 }
