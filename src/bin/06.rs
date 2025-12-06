@@ -11,7 +11,7 @@ pub struct Problem {
     pub numbers: Vec<u64>,
 }
 
-pub fn part_one(input: &str) -> Option<u64> {
+pub fn parse(input: &str) -> Vec<Problem> {
     let mut problems = Vec::<Problem>::new();
 
     for l in input.lines() {
@@ -43,6 +43,52 @@ pub fn part_one(input: &str) -> Option<u64> {
         }
     }
 
+    problems
+}
+
+pub fn parse2(input: &str) -> Vec<Problem> {
+    let mut problems = Vec::<Problem>::new();
+    let length = input.lines().next().unwrap().len();
+
+    let lines = input.lines().collect::<Vec<&str>>();
+
+    let mut problem = Problem::default();
+    for i in 0..length {
+        let mut number = 0;
+        let mut digit = 0;
+        for l in &lines {
+            let c = l.chars().nth(i).unwrap();
+            match c {
+                '*' | '+' => match c {
+                    '*' => problem.operation = Some(Operation::Multiply),
+                    '+' => problem.operation = Some(Operation::Add),
+                    _ => {}
+                },
+                ' ' => {}
+                _ => {
+                    let n = c.to_string().parse::<u64>().unwrap();
+                    number = number * 10 + n;
+                    digit += 1;
+                }
+            }
+        }
+        if digit > 0 {
+            problem.numbers.push(number);
+        } else {
+            problems.push(problem);
+            problem = Problem::default();
+        }
+    }
+    if !problem.numbers.is_empty() {
+        problems.push(problem);
+    }
+
+    problems
+}
+
+pub fn part_one(input: &str) -> Option<u64> {
+    let problems = parse(input);
+
     let mut result = 0;
     for p in problems {
         match p.operation {
@@ -62,7 +108,24 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let problems = parse2(input);
+
+    let mut result = 0;
+    for p in problems {
+        match p.operation {
+            Some(Operation::Add) => {
+                let sum: u64 = p.numbers.iter().sum();
+                result += sum;
+            }
+            Some(Operation::Multiply) => {
+                let product: u64 = p.numbers.iter().product();
+                result += product;
+            }
+            None => {}
+        }
+    }
+
+    Some(result)
 }
 
 #[cfg(test)]
@@ -78,6 +141,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(3263827));
     }
 }
