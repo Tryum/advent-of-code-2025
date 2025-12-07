@@ -1,4 +1,7 @@
-use std::{collections::HashSet, mem::swap};
+use std::{
+    collections::{HashMap, HashSet},
+    mem::swap,
+};
 
 advent_of_code::solution!(7);
 
@@ -32,8 +35,82 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(count)
 }
 
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct Beam {
+    x: usize,
+    y: usize,
+}
+
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let mut manifold = Vec::new();
+
+    for line in input.lines() {
+        if line.is_empty() {
+            break;
+        }
+        manifold.push(line);
+    }
+
+    let start = Beam {
+        x: manifold[0].find('S').unwrap(),
+        y: 0,
+    };
+
+    let queue = &mut vec![(vec![start.clone()], start.clone())];
+
+    let mut truc: HashMap<Beam, u64> = HashMap::new();
+
+    while let Some((mut backtrace, beam)) = queue.pop() {
+        if beam.y + 1 >= manifold.len() {
+            for node in &backtrace {
+                if let Some(val) = truc.get_mut(node) {
+                    *val += 1;
+                } else {
+                    truc.insert(node.clone(), 1);
+                }
+            }
+            continue;
+        }
+
+        if let Some(visits) = truc.get(&beam).cloned() {
+            for node in &backtrace {
+                if let Some(val) = truc.get_mut(node) {
+                    *val += visits;
+                } else {
+                    truc.insert(node.clone(), visits);
+                }
+            }
+            continue;
+        }
+
+        if manifold[beam.y].chars().nth(beam.x) == Some('^') {
+            backtrace.push(beam.clone());
+            queue.push((
+                backtrace.clone(),
+                Beam {
+                    x: beam.x - 1,
+                    y: beam.y + 1,
+                },
+            ));
+            queue.push((
+                backtrace,
+                Beam {
+                    x: beam.x + 1,
+                    y: beam.y + 1,
+                },
+            ));
+        } else {
+            queue.push((
+                backtrace,
+                Beam {
+                    x: beam.x,
+                    y: beam.y + 1,
+                },
+            ));
+        }
+    }
+
+    Some(truc[&start])
 }
 
 #[cfg(test)]
@@ -49,6 +126,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(40));
     }
 }
