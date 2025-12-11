@@ -48,8 +48,7 @@ pub fn part_one(input: &str) -> Option<u64> {
         circuits.insert(i, vec![i]);
     }
 
-    let mut connections = 0;
-    for (_, (jb_a_index, jb_b_index)) in min_distance_pairs {
+    for (connections, (_, (jb_a_index, jb_b_index))) in min_distance_pairs.into_iter().enumerate() {
         if connections >= pair_count {
             break;
         }
@@ -63,25 +62,25 @@ pub fn part_one(input: &str) -> Option<u64> {
             for &jb_index in &circuit_a {
                 circuits.insert(jb_index, circuit_a.clone());
             }
+        }
 
-            
-        }   
-        connections += 1;
-
-        let unique_circuits:HashSet<Vec<usize>>  = HashSet::from_iter(circuits.values().cloned());
+        //let unique_circuits: HashSet<Vec<usize>> = HashSet::from_iter(circuits.values().cloned());
         //println!("circuits: {:?}", unique_circuits);
     }
-    let unique_circuits:HashSet<Vec<usize>>  = HashSet::from_iter(circuits.values().cloned());
+    let unique_circuits: HashSet<Vec<usize>> = HashSet::from_iter(circuits.values().cloned());
     let mut sorted_circuits: Vec<_> = unique_circuits.into_iter().collect();
-    sorted_circuits.sort_by(|a, b| b.len().cmp(&a.len()));
+    sorted_circuits.sort_by_key(|b| std::cmp::Reverse(b.len()));
     let top_three: Vec<_> = sorted_circuits.into_iter().take(3).collect();
     //println!("Top 3 largest circuits: {:?}", top_three);
-    let result: u64 = top_three.iter().map(|circuit| circuit.len() as u64).product();
+    let result: u64 = top_three
+        .iter()
+        .map(|circuit| circuit.len() as u64)
+        .product();
     Some(result)
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-        let mut junction_boxes = Vec::new();
+    let mut junction_boxes = Vec::new();
     for line in input.lines() {
         if line.is_empty() {
             continue;
@@ -118,7 +117,6 @@ pub fn part_two(input: &str) -> Option<u64> {
     }
 
     for (_, (jb_a_index, jb_b_index)) in min_distance_pairs {
-
         if circuits[&jb_a_index] != circuits[&jb_b_index] {
             let mut circuit_a = circuits.remove(&jb_a_index).unwrap();
             let mut circuit_b = circuits.remove(&jb_b_index).unwrap();
@@ -128,22 +126,23 @@ pub fn part_two(input: &str) -> Option<u64> {
             for &jb_index in &circuit_a {
                 circuits.insert(jb_index, circuit_a.clone());
             }
-
-            
         }
 
-        let unique_circuits:HashSet<Vec<usize>>  = HashSet::from_iter(circuits.values().cloned());
+        let unique_circuits: HashSet<Vec<usize>> = HashSet::from_iter(circuits.values().cloned());
         if unique_circuits.len() == 1 {
             return Some(junction_boxes[jb_a_index].x * junction_boxes[jb_b_index].x);
         }
         //println!("circuits: {:?}", unique_circuits);
     }
-    let unique_circuits:HashSet<Vec<usize>>  = HashSet::from_iter(circuits.values().cloned());
+    let unique_circuits: HashSet<Vec<usize>> = HashSet::from_iter(circuits.values().cloned());
     let mut sorted_circuits: Vec<_> = unique_circuits.into_iter().collect();
-    sorted_circuits.sort_by(|a, b| b.len().cmp(&a.len()));
+    sorted_circuits.sort_by_key(|b| std::cmp::Reverse(b.len()));
     let top_three: Vec<_> = sorted_circuits.into_iter().take(3).collect();
     //println!("Top 3 largest circuits: {:?}", top_three);
-    let result: u64 = top_three.iter().map(|circuit| circuit.len() as u64).product();
+    let result: u64 = top_three
+        .iter()
+        .map(|circuit| circuit.len() as u64)
+        .product();
     Some(result)
 }
 
